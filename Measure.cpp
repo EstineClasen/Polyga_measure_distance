@@ -1,11 +1,8 @@
 #include "Measure.h"
 
 // Constants.
-const float INPUT_WIDTH = 640.0;
-const float INPUT_HEIGHT = 640.0;
-const float SCORE_THRESHOLD = 0.5;
-const float NMS_THRESHOLD = 0.45;
-const float CONFIDENCE_THRESHOLD = 0.45;
+const float f_confThreshold = 0.2f;
+const float f_iouThreshold = 0.2f;
 
 // Text parameters.
 const float FONT_SCALE = 0.7;
@@ -262,7 +259,7 @@ scanData DepthImageData(ISBScanner& scanner)
 
 int main(int argc, char** argv)
 {
-	
+	/*
 	//Initialization
 	ISBScanner* scanner;
 	SBDeviceList devices;
@@ -302,9 +299,43 @@ int main(int argc, char** argv)
 	memset(currentScanData.depthImage_file, 0, sizeof(currentScanData.depthImage_file));
 	memset(currentScanData.textureImage_file, 0, sizeof(currentScanData.textureImage_file));
 	currentScanData = DepthImageData(*scanner);
-	
+	*/
 
 	/////////Object detection on textureImage
+	bool b_isGPU = false;
+	const std::string sz_classNamesPath = "C:\\Users\\estin\\OneDrive\\Documents\\Visual Studio 2019\\Polyga_measure_distance\\Models\\object_detection_classes.txt";
+	const std::vector<std::string> vsz_classNamesList = detection_utils::loadClassNames(sz_classNamesPath);
+	const std::string sz_imagePath = "C:\\Users\\estin\\OneDrive\\Documents\\Visual Studio 2019\\Polyga_measure_distance\\Data\\1_not_padded.jpg";
+	const std::string sz_modelPath = "C:\\Users\\estin\\OneDrive\\Documents\\Visual Studio 2019\\Polyga_measure_distance\\Models\\turqoise5mm_tr528_val50_is736_b8_ep200_yolov5s.onnx";
+	
+	if (vsz_classNamesList.empty())
+	{
+		std::cerr << "Error: Empty class names file." << std::endl;
+		return -1;
+	}
+	ObjectDetector od_detector{ nullptr };
+	cv::Mat cv_m_imageInput;
+	std::vector<Detection> vsd_result;
+
+	try
+	{
+		od_detector = ObjectDetector(sz_modelPath, b_isGPU, cv::Size(736, 736));
+		std::cout << "Model was initialized." << std::endl;
+
+		cv_m_imageInput = cv::imread(sz_imagePath);
+		vsd_result = od_detector.detect(cv_m_imageInput, f_confThreshold, f_iouThreshold);		//returns results with bbox scaled back to original image
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return -1;
+	}
+
+	detection_utils::visualizeDetection(cv_m_imageInput, vsd_result, vsz_classNamesList);
+
+	cv::imshow("result", cv_m_imageInput);
+	// cv::imwrite("result.jpg", image);
+	cv::waitKey(0);
 
 	//Find center of bounding box VS find max Z in that region
 	
@@ -315,9 +346,9 @@ int main(int argc, char** argv)
 	//Calculate Euclidean distance between points
 
 	//Disconnecting scanner
-	scanner->disconnect();
+	//scanner->disconnect();
 	//Disposing scanner pointer since SBFactory::createDevice() news the scanner pointer.
-	SBFactory::disposeDevice(scanner);
+	//SBFactory::disposeDevice(scanner);
 	cout << "Press enter to exit";
 	getchar();
 

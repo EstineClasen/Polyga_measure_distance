@@ -10,13 +10,14 @@
 #include <format>
 #include <windows.h>
 #include "SBSDK.h"
-#include <windows.h>
 
 //Working with OpenCV and ONNX Neural Network
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/dnn.hpp>
 #include <fstream> 
+#include "include/detection_utils.h"
+#include "include/detector.h"
 
 // Namespaces.
 using namespace std;

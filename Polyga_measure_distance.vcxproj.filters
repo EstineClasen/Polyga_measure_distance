@@ -18,13 +18,27 @@
     <ClInclude Include="Measure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\detection_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\detector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Measure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\detection_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\detector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x64\native\onnxruntime.dll" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x64\native\onnxruntime_providers_shared.dll" />
     <None Include="packages.config" />
   </ItemGroup>
 </Project>
