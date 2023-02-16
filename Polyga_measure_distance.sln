@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.33214.272
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Polyga_measure_distance", "Polyga_measure_distance.vcxproj", "{E75F0A40-6986-4E75-8F35-9270191DADE6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C7F9FCE7-0662-4C30-A0E1-16CC2D27439E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Models", "Models", "{C5B55D7B-2CED-41FC-ADF7-4DBF56FA03C9}"
+	ProjectSection(SolutionItems) = preProject
+		Models\object_detection_classes.txt = Models\object_detection_classes.txt
+		Models\object_detection_classes_coco.txt = Models\object_detection_classes_coco.txt
+		Models\yolov5_20230214.pbtxt = Models\yolov5_20230214.pbtxt
+		Models\YOLOv5s.onnx = Models\YOLOv5s.onnx
+		Models\YOLOv5s.pb = Models\YOLOv5s.pb
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E75F0A40-6986-4E75-8F35-9270191DADE6}.Debug|x64.ActiveCfg = Debug|x64
+		{E75F0A40-6986-4E75-8F35-9270191DADE6}.Debug|x64.Build.0 = Debug|x64
+		{E75F0A40-6986-4E75-8F35-9270191DADE6}.Debug|x86.ActiveCfg = Debug|Win32
+		{E75F0A40-6986-4E75-8F35-9270191DADE6}.Debug|x86.Build.0 = Debug|Win32
+		{E75F0A40-6986-4E75-8F35-9270191DADE6}.Release|x64.ActiveCfg = Release|x64
+		{E75F0A40-6986-4E75-8F35-9270191DADE6}.Release|x64.Build.0 = Release|x64
+		{E75F0A40-6986-4E75-8F35-9270191DADE6}.Release|x86.ActiveCfg = Release|Win32
+		{E75F0A40-6986-4E75-8F35-9270191DADE6}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C5B55D7B-2CED-41FC-ADF7-4DBF56FA03C9} = {C7F9FCE7-0662-4C30-A0E1-16CC2D27439E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7C00B424-B393-4662-AF41-60F6C9B77211}
+	EndGlobalSection
+EndGlobal
