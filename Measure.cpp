@@ -260,159 +260,9 @@ scanData DepthImageData(ISBScanner& scanner)
 	return newScanData;
 }
 
-void draw_label(Mat& input_image, string label, int left, int top)
-{
-	// Display the label at the top of the bounding box.
-	int baseLine;
-	Size label_size = getTextSize(label, FONT_FACE, FONT_SCALE, THICKNESS, &baseLine);
-	top = max(top, label_size.height);
-	// Top left corner.
-	Point tlc = Point(left, top);
-	// Bottom right corner.
-	Point brc = Point(left + label_size.width, top + label_size.height + baseLine);
-	// Draw white rectangle.
-	rectangle(input_image, tlc, brc, BLACK, FILLED);
-	// Put the label on the black rectangle.
-	putText(input_image, label, Point(left, top + label_size.height), FONT_FACE, FONT_SCALE, YELLOW, THICKNESS);
-}
-
-vector<Mat> pre_process(Mat& input_image, Net& net)
-{
-	// Convert to blob.
-	Mat blob;
-	blobFromImage(input_image, blob, 1. / 255., Size(INPUT_WIDTH, INPUT_HEIGHT), Scalar(), true, false);
-
-	net.setInput(blob);
-
-	// Forward propagate.
-	vector<Mat> outputs;
-	net.forward(outputs, net.getUnconnectedOutLayersNames());
-
-	return outputs;
-}
-
-Mat post_process(Mat& input_image, vector<Mat>& outputs, const vector<string>& class_name)
-{
-	// Initialize vectors to hold respective outputs while unwrapping     detections.
-	vector<int> class_ids;
-	vector<float> confidences;
-	vector<Rect> boxes;
-	// Resizing factor.
-	float x_factor = input_image.cols / INPUT_WIDTH;
-	float y_factor = input_image.rows / INPUT_HEIGHT;
-	float* data = (float*)outputs[0].data;
-	const int dimensions = 85;
-	// 25200 for default size 640.
-	const int rows = 25200;
-	// Iterate through 25200 detections.
-	for (int i = 0; i < rows; ++i)
-	{
-		float confidence = data[4];
-		// Discard bad detections and continue.
-		if (confidence >= CONFIDENCE_THRESHOLD)
-		{
-			float* classes_scores = data + 5;
-			// Create a 1x85 Mat and store class scores of 80 classes.
-			Mat scores(1, class_name.size(), CV_32FC1, classes_scores);
-			// Perform minMaxLoc and acquire the index of best class  score.
-			Point class_id;
-			double max_class_score;
-			minMaxLoc(scores, 0, &max_class_score, 0, &class_id);
-			// Continue if the class score is above the threshold.
-			if (max_class_score > SCORE_THRESHOLD)
-			{
-				// Store class ID and confidence in the pre-defined respective vectors.
-				confidences.push_back(confidence);
-				class_ids.push_back(class_id.x);
-				// Center.
-				float cx = data[0];
-				float cy = data[1];
-				// Box dimension.
-				float w = data[2];
-				float h = data[3];
-				// Bounding box coordinates.
-				int left = int((cx - 0.5 * w) * x_factor);
-				int top = int((cy - 0.5 * h) * y_factor);
-				int width = int(w * x_factor);
-				int height = int(h * y_factor);
-				// Store good detections in the boxes vector.
-				boxes.push_back(Rect(left, top, width, height));
-			}
-		}
-		// Jump to the next row.
-		data += 85;
-	}
-	// Perform Non-Maximum Suppression and draw predictions.
-	vector<int> indices;
-	NMSBoxes(boxes, confidences, SCORE_THRESHOLD, NMS_THRESHOLD, indices);
-	for (int i = 0; i < indices.size(); i++)
-	{
-		int idx = indices[i];
-		Rect box = boxes[idx];
-		int left = box.x;
-		int top = box.y;
-		int width = box.width;
-		int height = box.height;
-		// Draw bounding box.
-		rectangle(input_image, Point(left, top), Point(left + width, top + height), BLUE, 3 * THICKNESS);
-		// Get the label for the class name and its confidence.
-		string label = format("%.2f", confidences[idx]);
-		label = class_name[class_ids[idx]] + ":" + label;
-		// Draw class labels.
-		draw_label(input_image, label, left, top);
-	}
-	return input_image;
-}
-
-void createGraphTextFromTFModel()
-{
-	writeTextGraph("Models/YOLOv5s.pb", "Models/yolov5_20230214.pbtxt");
-	return;
-}
-
-vector<string> load_class_list()
-{
-	//string file_path = "C:/Users/estin/PycharmProjects/TrainYolov5/data/5mm_turqoise/";
-	vector<string> class_list;
-	//ifstream ifs(string(file_path + "object_detection_classes.txt").c_str());
-	ifstream ifs(string("object_detection_classes_coco.txt").c_str());
-	string line;
-	while (getline(ifs, line))
-	{
-		class_list.push_back(line);
-	}
-	return class_list;
-}
-
-void load_net(Net& net, bool is_cuda)
-{
-	//https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exists-using-standard-c-c11-14-17-c	Can make this faster
-	string fileName = "Models/YOLOv5s.onnx";
-	struct stat buffer;
-	cout << (stat(fileName.c_str(), &buffer) == 0);
-	
-	//auto result = readNet("C:\\Users\\estin\\PycharmProjects\\TrainYolov5\\YOLOv5\\models\\YOLOv5s.onnx");
-	auto result = readNetFromONNX(fileName);
-	//auto result = readNet("Models\\YOLOv5s.pb", "Models\\yolov5_20230214.pbtxt", "TensorFlow");
-	if (is_cuda)
-	{
-		cout << "Attempting to use CUDA\n";
-		result.setPreferableBackend(DNN_BACKEND_CUDA);
-		result.setPreferableTarget(DNN_TARGET_CUDA_FP16);
-	}
-	else
-	{
-		cout << "Running on CPU\n";
-		result.setPreferableBackend(DNN_BACKEND_OPENCV);
-		result.setPreferableTarget(DNN_TARGET_CPU);
-	}
-	net = result;
-}
-
 int main(int argc, char** argv)
 {
-	//createGraphTextFromTFModel();
-	/*
+	
 	//Initialization
 	ISBScanner* scanner;
 	SBDeviceList devices;
@@ -447,69 +297,14 @@ int main(int argc, char** argv)
 	//SaveTextureImage(*scanner);
 
 	//Depth Image to xyz and save textureImage
-	//scanData currentScanData;
-	//memset(currentScanData.xyz_file, 0, sizeof(currentScanData.xyz_file));
-	//memset(currentScanData.depthImage_file, 0, sizeof(currentScanData.depthImage_file));
-	//memset(currentScanData.textureImage_file, 0, sizeof(currentScanData.textureImage_file));
-	//currentScanData = DepthImageData(*scanner);
-	*/
+	scanData currentScanData;
+	memset(currentScanData.xyz_file, 0, sizeof(currentScanData.xyz_file));
+	memset(currentScanData.depthImage_file, 0, sizeof(currentScanData.depthImage_file));
+	memset(currentScanData.textureImage_file, 0, sizeof(currentScanData.textureImage_file));
+	currentScanData = DepthImageData(*scanner);
+	
 
 	/////////Object detection on textureImage
-	// https://www.youtube.com/watch?v=tjzJs9rOeEM and https://learnopencv.com/object-detection-using-yolov5-and-opencv-dnn-in-c-and-python/ and https://github.com/niconielsen32/ComputerVision/blob/master/OpenCVdnn/objectDetection.cpp
-	// Load class list.
-	vector<string> class_list = load_class_list();
-	// Load image.
-	Mat frame;
-	frame = imread("Data/traffic.jpeg");
-	int image_height = frame.cols;
-	int image_width = frame.rows;
-	// Load model.
-	bool is_cuda = false;		//argc > 1 && strcmp(argv[1], "cuda") == 0;
-	Net net;
-	load_net(net, is_cuda);
-	//std::filesystem::path _model = "C:/Users/estin/PycharmProjects/TrainYolov5/YOLOv5/models/YOLOv5s.onnx";
-	//net = readNet("C:/Users/estin/PycharmProjects/TrainYolov5/YOLOv5/models/YOLOv5s.onnx");
-	//net = readNetFromONNX("C:\\Users\\estin\\PycharmProjects\\TrainYolov5\\YOLOv5\\models\\YOLOv5s.onnx");
-	// Set a min confidence score for the detections
-	float min_confidence_score = 0.5;
-	auto start = getTickCount();
-	// Create a blob from the image
-	Mat blob = blobFromImage(frame, 1.0, Size(300, 300), Scalar(127.5, 127.5, 127.5),true, false);
-	// Set the blob to be input to the neural network
-	net.setInput(blob);
-	// Forward pass of the blob through the neural network to get the predictions
-	Mat output = net.forward();
-	auto end = getTickCount();
-
-	// Matrix with all the detections
-	Mat results(output.size[2], output.size[3], CV_32F, output.ptr<float>());
-
-	// Run through all the predictions
-	for (int i = 0; i < results.rows; i++) {
-		int class_id = int(results.at<float>(i, 1));
-		float confidence = results.at<float>(i, 2);
-
-		// Check if the detection is over the min threshold and then draw bbox
-		if (confidence > min_confidence_score) {
-			int bboxX = int(results.at<float>(i, 3) * frame.cols);
-			int bboxY = int(results.at<float>(i, 4) * frame.rows);
-			int bboxWidth = int(results.at<float>(i, 5) * frame.cols - bboxX);
-			int bboxHeight = int(results.at<float>(i, 6) * frame.rows - bboxY);
-			rectangle(frame, Point(bboxX, bboxY), Point(bboxX + bboxWidth, bboxY + bboxHeight), Scalar(0, 0, 255), 2);
-			string class_name = class_list[class_id - 1];
-			putText(frame, class_name + " " + to_string(int(confidence * 100)) + "%", Point(bboxX, bboxY - 10), FONT_HERSHEY_SIMPLEX, 1.5, Scalar(0, 255, 0), 2);
-		}
-	}
-
-	auto totalTime = (end - start) / getTickFrequency();
-
-
-	putText(frame, "FPS: " + to_string(int(1 / totalTime)), Point(50, 50), FONT_HERSHEY_DUPLEX, 1, Scalar(0, 255, 0), 2, false);
-
-	imshow("image", frame);
-
-
-	waitKey(0);
 
 	//Find center of bounding box VS find max Z in that region
 	
@@ -520,9 +315,9 @@ int main(int argc, char** argv)
 	//Calculate Euclidean distance between points
 
 	//Disconnecting scanner
-	//scanner->disconnect();
+	scanner->disconnect();
 	//Disposing scanner pointer since SBFactory::createDevice() news the scanner pointer.
-	//SBFactory::disposeDevice(scanner);
+	SBFactory::disposeDevice(scanner);
 	cout << "Press enter to exit";
 	getchar();
 
