@@ -354,13 +354,16 @@ int main(int argc, char** argv)
 
 	detection_utils::visualizeDetection(cv_m_imageInput, vsd_result, vsz_classNamesList);
 
-	//Find max Z in the region of each bbox
+	//Find max Z in the region of each bbox -> not very accurate
+	//Rather try center of bbox
 	xyz3Dand2D as_xyz3DPinCenters[10];		//Accomodate max 10 pins for now
 	memset(as_xyz3DPinCenters, 0, sizeof(as_xyz3DPinCenters));		//TODO: check if this is right?
 	int iCountPins = 0;
 
 	for (const Detection& detection : vsd_result)
-	{	//define ROI
+	{	
+		/*
+		//define ROI
 		int iZMaxIndex = 0;
 		int iXatZMax = 0;
 		int iYatZMax = 0;
@@ -393,6 +396,19 @@ int main(int argc, char** argv)
 		as_xyz3DPinCenters[iCountPins].z3D = as_xyz3DAll[iZMaxIndex].z;
 		as_xyz3DPinCenters[iCountPins].xPixel = iXatZMax;
 		as_xyz3DPinCenters[iCountPins].yPixel = iYatZMax;
+		iCountPins++;
+		*/
+
+		int xCenterPixel = detection.box.x + (detection.box.width/2);
+		int yCenterPixel = detection.box.y + (detection.box.height / 2);
+		//Get coordinates for each pin center from .xyz row
+		//Row = (x+1)+(720*y) (check if array indexed at 0 or 1 like file)
+		int iIndex = (xCenterPixel)+(yCenterPixel * 720);
+		as_xyz3DPinCenters[iCountPins].x3D = as_xyz3DAll[iIndex].x;
+		as_xyz3DPinCenters[iCountPins].y3D = as_xyz3DAll[iIndex].y;
+		as_xyz3DPinCenters[iCountPins].z3D = as_xyz3DAll[iIndex].z;
+		as_xyz3DPinCenters[iCountPins].xPixel = xCenterPixel;
+		as_xyz3DPinCenters[iCountPins].yPixel = yCenterPixel;
 		iCountPins++;
 	}
 
