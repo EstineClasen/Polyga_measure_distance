@@ -51,7 +51,7 @@ void detection_utils::visualizeDetection(cv::Mat& image, std::vector<Detection>&
 {
     for (const Detection& detection : detections)
     {
-        cv::rectangle(image, detection.box, cv::Scalar(229, 160, 21), 2);
+        cv::rectangle(image, detection.box, cv::Scalar(229, 160, 21), 1);
 
         int x = detection.box.x;
         int y = detection.box.y;
@@ -62,13 +62,9 @@ void detection_utils::visualizeDetection(cv::Mat& image, std::vector<Detection>&
 
         int baseline = 0;
         cv::Size size = cv::getTextSize(label, cv::FONT_ITALIC, 0.8, 2, &baseline);
-        cv::rectangle(image,
-                      cv::Point(x, y - 25), cv::Point(x + size.width, y),
-                      cv::Scalar(229, 160, 21), -1);
+        //cv::rectangle(image, cv::Point(x, y - 25), cv::Point(x + size.width, y), cv::Scalar(229, 160, 21), -1);
 
-        cv::putText(image, label,
-                    cv::Point(x, y - 3), cv::FONT_ITALIC,
-                    0.8, cv::Scalar(255, 255, 255), 2);
+        //cv::putText(image, label, cv::Point(x, y - 3), cv::FONT_ITALIC, 0.8, cv::Scalar(255, 255, 255), 2);
     }
 }
 
@@ -125,6 +121,7 @@ void detection_utils::letterbox(const cv::Mat& image, cv::Mat& outImage,
 
 void detection_utils::scaleCoords(const cv::Size& imageShape, cv::Rect& coords, const cv::Size& imageOriginalShape)
 {
+    /*
     float gain = std::min((float)imageShape.height / (float)imageOriginalShape.height,
                           (float)imageShape.width / (float)imageOriginalShape.width);
 
@@ -142,6 +139,10 @@ void detection_utils::scaleCoords(const cv::Size& imageShape, cv::Rect& coords, 
     // coords.y = utils::clip(coords.y, 0, imageOriginalShape.height);
     // coords.width = utils::clip(coords.width, 0, imageOriginalShape.width);
     // coords.height = utils::clip(coords.height, 0, imageOriginalShape.height);
+    */
+    //convert back to before black padding was added
+    coords.x = coords.x - 8;
+    coords.y = coords.y - 108;
 }
 
 template <typename T>

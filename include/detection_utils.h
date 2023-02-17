@@ -6,7 +6,7 @@
 
 struct Detection
 {
-    cv::Rect box;
+    cv::Rect box;           //final result is top left x, y, width, height
     float conf{};
     int classId{};
 };

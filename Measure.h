@@ -33,8 +33,30 @@ struct scanData
 	char textureImage_file[100];
 };
 
+struct xyz3D
+{
+	float x;
+	float y;
+	float z;
+};
+
+struct xyz3Dand2D
+{
+	float x3D;
+	float y3D;
+	float z3D;
+	int xPixel;
+	int yPixel;
+};
+
 
 class Measure
 {
+//public:
+//	xyz vs_xyzAll[374400];
+
+//private:
+	
 };
+
 
